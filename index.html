@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Самостійна робота — Фізика, 8 клас</title>
+<style>
+:root{--blue:#263d86;--pale:#eef2ff;--ink:#202536;--muted:#667085;--line:#d9deea}
+*{box-sizing:border-box}body{margin:0;background:#f4f6fb;color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:760px;margin:0 auto;padding:18px 14px 40px}
+header{background:var(--blue);color:white;padding:22px 20px;border-radius:16px;margin-bottom:16px}
+h1{font-size:23px;line-height:1.2;margin:0 0 6px}header p{margin:0;color:#e8ecff}
+.card{background:white;border:1px solid var(--line);border-radius:14px;padding:16px;margin:12px 0;box-shadow:0 2px 8px #1725540a}
+label{display:block;font-weight:650;margin:10px 0 5px}
+input{width:100%;padding:13px;border:1px solid #b9c2d5;border-radius:9px;font:inherit;background:#fff}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.task h2{font-size:17px;color:var(--blue);margin:0 0 8px}
+.task p{margin:0 0 12px}
+.hint{font-size:13px;color:var(--muted)}
+button{border:0;border-radius:10px;background:var(--blue);color:white;padding:12px 16px;font:600 15px system-ui,-apple-system,"Segoe UI",sans-serif;cursor:pointer}
+button:disabled{opacity:.5;cursor:not-allowed}
+.check{margin-top:10px}
+.feedback{font-weight:650;margin-top:8px;min-height:24px}
+.correct{color:#167647}.wrong{color:#b42318}
+#finish{width:100%;margin-top:14px;padding:15px;font-size:16px}
+#result{display:none;text-align:center;background:var(--pale);border:1px solid #cbd5ff}
+.score{font-size:30px;font-weight:800;color:var(--blue)}
+.small{font-size:13px;color:var(--muted)}
+@media(max-width:520px){.grid{grid-template-columns:1fr}main{padding:12px 10px 30px}header{padding:19px 16px}h1{font-size:21px}}
+</style>
+</head>
+<body>
+<main>
+<header><h1>Самостійна робота</h1><p>Фізика, 8 клас · Теплові явища · Один варіант для всіх</p></header>
+<section class="card">
+<strong>Перед початком</strong>
+<div class="grid">
+<div><label for="surname">Прізвище</label><input id="surname" autocomplete="family-name" placeholder="Ваше прізвище"></div>
+<div><label for="firstname">Ім’я</label><input id="firstname" autocomplete="given-name" placeholder="Ваше ім’я"></div>
+</div>
+<p class="hint">6 задач · максимум 12 балів · на кожну задачу дається 2 спроби. Правильна відповідь з першої спроби — 2 бали, з другої — 1 бал.</p>
+</section>
+<section class="card">
+<strong>Довідкові дані</strong>
+<p class="small">Питома теплоємність води — 4200 Дж/(кг·°C); олії — 1700 Дж/(кг·°C); чавуну — 540 Дж/(кг·°C). Густина олії — 900 кг/м³. Густина води — 1000 кг/м³. Вважайте, що теплообміном із довкіллям можна знехтувати, якщо не зазначено інше.</p>
+</section>
+<div id="tasks"></div>
+<button id="finish" disabled>Завершити роботу та побачити результат</button>
+<section class="card" id="result"><h2>Результат</h2><div class="score" id="score"></div><p id="resultText"></p><p class="small">Результат відображається на цьому пристрої. Зробіть скриншот або покажіть його вчителю.</p></section>
+</main>
+<script>
+const questions=[
+{title:"1. Охолодження олії",text:"Яку кількість теплоти віддають 5 л олії під час охолодження від 50 °C до 10 °C? Густина олії — 900 кг/м³. Відповідь у кДж.",answer:306,tol:0.5,unit:"кДж",explain:"m = ρV = 900 · 0,005 = 4,5 кг; Q = cmΔt = 1700 · 4,5 · 40 = 306 000 Дж = 306 кДж."},
+{title:"2. Визначення питомої теплоємності",text:"Для нагрівання 2 л речовини на 20 °C потрібно 150 кДж теплоти. Густина речовини — 1500 кг/м³. Визначте питому теплоємність. Відповідь у Дж/(кг·°C).",answer:2500,tol:10,unit:"Дж/(кг·°C)",explain:"m = ρV = 1500 · 0,002 = 3 кг; c = Q/(mΔt) = 150 000/(3 · 20) = 2500 Дж/(кг·°C)."},
+{title:"3. Нагрівання каструлі з водою",text:"У чавунну каструлю масою 5 кг налили 9 кг води. Яку кількість теплоти потрібно передати каструлі з водою, щоб нагріти їх від 30 °C до 100 °C? Відповідь у МДж.",answer:2.835,tol:0.01,unit:"МДж",explain:"Q = (cчmч + cвmв)Δt = (540 · 5 + 4200 · 9) · 70 = 2 835 000 Дж = 2,835 МДж."},
+{title:"4. Зміна температури води",text:"У склянці міститься 200 см³ води. Якою буде зміна температури води, якщо їй передати 100 Дж теплоти? Густина води — 1000 кг/м³. Відповідь у °C.",answer:0.1190476,tol:0.005,unit:"°C",explain:"m = ρV = 1000 · 0,0002 = 0,2 кг; Δt = Q/(cm) = 100/(4200 · 0,2) ≈ 0,119 °C."},
+{title:"5. Доливання окропу",text:"У відрі є 5 л води температурою 18 °C. Скільки літрів окропу (100 °C) потрібно долити, щоб температура суміші стала 47 °C? Відповідь у літрах.",answer:2.735849,tol:0.02,unit:"л",explain:"mх(47 − 18) = mг(100 − 47); mг = 5 · 29/53 ≈ 2,74 кг, тобто приблизно 2,74 л."},
+{title:"6. Змішування води",text:"До 500 г води температурою 70 °C додали 200 г води температурою 10 °C. Визначте температуру суміші. Відповідь у °C.",answer:52.85714,tol:0.1,unit:"°C",explain:"t = (m₁t₁ + m₂t₂)/(m₁ + m₂) = (500 · 70 + 200 · 10)/700 ≈ 52,9 °C."}
+];
+const state=questions.map(()=>({tries:0,done:false,points:0}));
+const host=document.getElementById("tasks");
+questions.forEach((q,i)=>{
+ const el=document.createElement("section");el.className="card task";
+ el.innerHTML=`<h2>${q.title} <span class="hint">· 2 бали</span></h2><p>${q.text}</p><label for="ans${i}">Ваша відповідь (${q.unit})</label><input id="ans${i}" inputmode="decimal" placeholder="Введіть число" aria-label="Відповідь на завдання ${i+1}"><button class="check" id="btn${i}">Перевірити</button><div class="feedback" id="fb${i}" aria-live="polite"></div><div class="small" id="tries${i}">Спроб використано: 0 із 2</div>`;
+ host.appendChild(el);
+});
+function numeric(v){return Number(v.trim().replace(/\\s/g,"").replace(",", "."));}
+questions.forEach((q,i)=>{
+ document.getElementById(`btn${i}`).addEventListener("click",()=>{
+  if(state[i].done)return;
+  const inp=document.getElementById(`ans${i}`), val=numeric(inp.value), fb=document.getElementById(`fb${i}`);
+  if(!inp.value.trim() || !Number.isFinite(val)){fb.textContent="Введіть числову відповідь.";fb.className="feedback wrong";return;}
+  state[i].tries++;
+  if(Math.abs(val-q.answer)<=q.tol){
+    state[i].done=true;state[i].points=state[i].tries===1?2:1;
+    fb.textContent=`Правильно! ${state[i].points} бал(и). ${q.explain}`;
+    fb.className="feedback correct";inp.disabled=true;document.getElementById(`btn${i}`).disabled=true;
+  }else if(state[i].tries<2){
+    fb.textContent="Не зовсім правильно. Спробуйте ще раз.";
+    fb.className="feedback wrong";
+  }else{
+    state[i].done=true;state[i].points=0;
+    fb.textContent=`Спроби використано. Правильний розв’язок: ${q.explain}`;
+    fb.className="feedback wrong";inp.disabled=true;document.getElementById(`btn${i}`).disabled=true;
+  }
+  document.getElementById(`tries${i}`).textContent=`Спроб використано: ${state[i].tries} із 2`;
+  document.getElementById("finish").disabled=!state.every(x=>x.done);
+ });
+});
+document.getElementById("finish").addEventListener("click",()=>{
+ const surname=document.getElementById("surname").value.trim(), firstname=document.getElementById("firstname").value.trim();
+ if(!surname||!firstname){alert("Спочатку введіть прізвище та ім’я.");return;}
+ const total=state.reduce((s,x)=>s+x.points,0);
+ document.getElementById("score").textContent=`${total} / 12 балів`;
+ document.getElementById("resultText").textContent=`${surname} ${firstname} · Правильних завдань: ${state.filter(x=>x.points>0).length} із 6.`;
+ document.getElementById("result").style.display="block";
+ document.getElementById("result").scrollIntoView({behavior:"smooth"});
+ document.getElementById("finish").disabled=true;
+});
+</script>
+</body></html>
